@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Moneda Universitaria - Transparente & Oficial 🪙</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Space Grotesk & Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --coin-size: 200px;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #030712;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.2) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.18) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.15) 0px, transparent 50%);
+            color: #f8fafc;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .font-space {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* Glassmorphism styling */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* 3D Coin Setup */
+        .coin-stage {
+            width: var(--coin-size);
+            height: var(--coin-size);
+            perspective: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .coin-wrapper {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            transform-style: preserve-3d;
+            will-change: transform;
+            cursor: pointer;
+        }
+
+        .coin-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 16px;
+        }
+
+        /* FRONT FACE: CARA = NO IR A LA UNIVERSIDAD (Dorado Neón) */
+        .coin-front {
+            border: 8px solid #fbbf24;
+            box-shadow: 
+                inset 0 0 25px rgba(0, 0, 0, 0.65),
+                inset 0 0 3px 2px rgba(255, 255, 255, 0.8),
+                0 0 30px rgba(245, 158, 11, 0.4);
+            background: radial-gradient(circle at 35% 35%, #fef08a 0%, #f59e0b 55%, #78350f 100%);
+            color: #2e1000;
+        }
+
+        /* BACK FACE: SELLO = IR A LA UNIVERSIDAD (Plateado Neón) */
+        .coin-back {
+            transform: rotateY(180deg);
+            border: 8px solid #94a3b8;
+            box-shadow: 
+                inset 0 0 25px rgba(0, 0, 0, 0.65),
+                inset 0 0 3px 2px rgba(255, 255, 255, 0.8),
+                0 0 30px rgba(148, 163, 184, 0.3);
+            background: radial-gradient(circle at 35% 35%, #f1f5f9 0%, #94a3b8 55%, #334155 100%);
+            color: #0f172a;
+        }
+
+        .coin-edge {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px dashed rgba(0, 0, 0, 0.25);
+            pointer-events: none;
+        }
+
+        @media (max-width: 380px) {
+            :root {
+                --coin-size: 170px;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-full flex flex-col justify-between p-4 md:p-6 antialiased">
+
+    <!-- Header Transparente Imparcial -->
+    <header class="max-w-md w-full mx-auto flex justify-between items-center glass-panel p-3.5 rounded-2xl mb-4 border border-slate-700/50">
+        <div class="flex items-center space-x-3">
+            <div class="bg-gradient-to-tr from-amber-400 to-orange-500 p-2.5 rounded-xl text-slate-950 font-black shadow-lg shadow-amber-500/20">
+                <i class="fa-solid fa-coins text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-space font-extrabold text-base leading-none bg-gradient-to-r from-amber-300 via-orange-300 to-yellow-200 bg-clip-text text-transparent">
+                    Moneda Universitaria
+                </h1>
+                <p class="text-[11px] text-slate-400 font-medium mt-1 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Sistema Imparcial 50 / 50
+                </p>
+            </div>
+        </div>
+
+        <div class="bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-[10px] font-bold px-2.5 py-1.5 rounded-xl flex items-center gap-1">
+            <i class="fa-solid fa-scale-balanced"></i>
+            <span>Verificado</span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-md w-full mx-auto flex-1 flex flex-col items-center justify-center space-y-5 my-auto">
+        
+        <!-- Rules Banner -->
+        <div class="w-full glass-card rounded-2xl p-3.5 text-center border border-slate-700/60 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-indigo-500/5 to-pink-500/5 opacity-50"></div>
+            <p class="text-[10px] font-space font-bold uppercase tracking-widest text-slate-400 mb-1">Reglas del Decisor ⚖️</p>
+            <div class="flex items-center justify-center gap-3 text-xs font-bold">
+                <span class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    👑 CARA = NO IR A LA UNIVERSIDAD
+                </span>
+                <span class="text-slate-500">|</span>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-500/20 text-slate-300 border border-slate-500/30">
+                    🦅 SELLO = IR A LA UNIVERSIDAD
+                </span>
+            </div>
+        </div>
+
+        <!-- 3D Coin Section -->
+        <div class="py-4 relative flex flex-col items-center justify-center w-full">
+            
+            <div class="coin-stage">
+                <div class="coin-wrapper" id="coinWrapper" title="Haz clic para lanzar la moneda">
+                    
+                    <!-- FRONT FACE: CARA (NO IR A LA UNIVERSIDAD) -->
+                    <div class="coin-face coin-front font-black">
+                        <div class="coin-edge"></div>
+                        <i class="fa-solid fa-ban text-4xl mb-1 text-amber-950/80 drop-shadow-md"></i>
+                        <span class="text-[10px] uppercase tracking-widest font-space text-amber-950/70 font-extrabold">CARA</span>
+                        <span class="text-base font-black tracking-tight leading-tight text-amber-950 uppercase mt-1">
+                            NO IR A LA<br>UNIVERSIDAD
+                        </span>
+                    </div>
+
+                    <!-- BACK FACE: SELLO (IR A LA UNIVERSIDAD) -->
+                    <div class="coin-face coin-back font-black">
+                        <div class="coin-edge"></div>
+                        <i class="fa-solid fa-graduation-cap text-4xl mb-1 text-slate-900/80 drop-shadow-md"></i>
+                        <span class="text-[10px] uppercase tracking-widest font-space text-slate-900/70 font-extrabold">SELLO</span>
+                        <span class="text-base font-black tracking-tight leading-tight text-slate-900 uppercase mt-1">
+                            IR A LA<br>UNIVERSIDAD
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Dynamic Coin Shadow -->
+            <div id="coinShadow" class="w-32 h-3.5 bg-black/60 rounded-full mt-6 filter blur-md transition-all duration-100 transform"></div>
+        </div>
+
+        <!-- Main Trigger Button -->
+        <div class="w-full">
+            <button id="flipBtn" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black font-space text-lg shadow-xl shadow-orange-500/20 active:scale-95 transition-all duration-150 flex items-center justify-center gap-3 border-b-4 border-amber-700">
+                <i class="fa-solid fa-hand-holding-dollar text-xl"></i>
+                <span id="flipBtnText">¡LANZAR LA MONEDA!</span>
+            </button>
+        </div>
+
+        <!-- Result Card -->
+        <div id="resultCard" class="w-full glass-panel border-2 border-amber-400/50 rounded-2xl p-4 text-center shadow-2xl transition-all duration-300 transform scale-90 opacity-0 hidden">
+            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 mb-2">
+                ✨ Veredicto Oficial e Inapelable
+            </span>
+            <h2 id="resultTitle" class="text-xl md:text-2xl font-black text-amber-300 tracking-wide font-space uppercase mb-1">
+                NO IR A LA UNIVERSIDAD
+            </h2>
+            <p id="resultText" class="text-slate-200 text-xs font-medium mb-3">
+                "La física de la moneda ha decidido legítimamente que hoy NO se asiste a clase."
+            </p>
+            
+            <!-- WhatsApp Share Button -->
+            <button id="shareBtn" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 active:scale-95">
+                <i class="fa-brands fa-whatsapp text-base"></i>
+                <span>Enviar Veredicto por WhatsApp</span>
+            </button>
+        </div>
+
+        <!-- Excuses Generator Section -->
+        <div class="w-full glass-card rounded-2xl p-3.5 border border-slate-700/50">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="font-bold text-xs text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-shield-cat text-amber-400"></i> Generador de Excusas Oficiales
+                </h3>
+                <button id="copyExcuseBtn" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1 active:scale-90 transition-transform">
+                    <i class="fa-regular fa-copy"></i> Copiar
+                </button>
+            </div>
+            <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 text-xs text-slate-300 min-h-[46px] flex items-center justify-center text-center italic" id="excuseDisplay">
+                Genera una excusa para justificar el resultado de la moneda...
+            </div>
+            <button id="generateExcuseBtn" class="w-full mt-2.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-2 active:scale-95">
+                <i class="fa-solid fa-dice text-sm"></i> Generar Excusa para el Profesor
+            </button>
+        </div>
+
+        <!-- Dashboard Statistics -->
+        <div class="w-full grid grid-cols-2 gap-2.5">
+            <div class="glass-card p-3 rounded-xl text-center border border-slate-800">
+                <p class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Días Salvados de la U</p>
+                <p class="text-2xl font-extrabold text-amber-400 mt-0.5 font-space" id="statSavedDays">0</p>
+            </div>
+            <div class="glass-card p-3 rounded-xl text-center border border-slate-800">
+                <p class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Tasa de Imparcialidad</p>
+                <p class="text-2xl font-extrabold text-emerald-400 mt-0.5 font-space">100% <span class="text-[10px] font-normal text-slate-400">⚖️</span></p>
+            </div>
+        </div>
+
+        <!-- Footnote -->
+        <p class="text-[10px] text-slate-500 text-center italic">
+            * Este simulador garantiza física transparente 50/50. Si sale NO IR, se debe acatar la ley del azar.
+        </p>
+
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-4 py-2.5 rounded-xl border border-slate-700 shadow-2xl flex items-center gap-2.5 translate-y-20 opacity-0 transition-all duration-300 z-50 pointer-events-none text-xs">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+        <span id="toastMsg" class="font-medium">Notificación</span>
+    </div>
+
+    <script>
+        let isFlipping = false;
+        let currentYRotation = 0;
+
+        let savedDays = parseInt(localStorage.getItem('u_savedDays_v4')) || 0;
+
+        // DOM Elements
+        const coinWrapper = document.getElementById('coinWrapper');
+        const coinShadow = document.getElementById('coinShadow');
+        const flipBtn = document.getElementById('flipBtn');
+        const flipBtnText = document.getElementById('flipBtnText');
+
+        const resultCard = document.getElementById('resultCard');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultText = document.getElementById('resultText');
+        const shareBtn = document.getElementById('shareBtn');
+
+        const excuseDisplay = document.getElementById('excuseDisplay');
+        const generateExcuseBtn = document.getElementById('generateExcuseBtn');
+        const copyExcuseBtn = document.getElementById('copyExcuseBtn');
+        const statSavedDays = document.getElementById('statSavedDays');
+
+        const excuses = [
+            "Ocurrió un fallo en el sistema de transporte que impidió el desplazamiento a la facultad.",
+            "Fuerte bloqueo electromagnético y alineación cósmica desfavorable para el aprendizaje presencial.",
+            "Complicación médica de última hora: fallo agudo en los niveles de energía matutinos.",
+            "Cálculos de física aplicada confirmaron que ir a la U perturbaba el continuo espacio-tiempo local.",
+            "Investigación sociológica en curso sobre los beneficios del descanso universitario presencial.",
+            "Problemas técnicos imprevistos en la logística de movilización hacia el campus.",
+            "Inconvenientes de fuerza mayor relacionados con las condiciones climáticas y la gravedad terrestre.",
+            "Tráfico intempestivo de patos cruzando la avenida principal hacia la universidad.",
+            "Restricción epidemiológica preventiva por falta crítica de cafeína en el organismo."
+        ];
+
+        const victoryPhrases = [
+            "La moneda ha hablado legítimamente: Hoy NO SE VA a la universidad.",
+            "El azar científico ha determinado con total claridad que NO asistes a clase.",
+            "Veredicto oficial inapelable: La gravedad y el destino ordenan NO IR A LA UNIVERSIDAD.",
+            "El lanzamiento es 100% claro y transparente: Quedas liberado de ir a la U hoy."
+        ];
+
+        // Web Audio API Sound Synthesizer
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const now = audioCtx.currentTime;
+
+                if (type === 'spin') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(700 + Math.random() * 400, now);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.07);
+                } else if (type === 'bounce') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.exponentialRampToValueAtTime(40, now + 0.18);
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.18);
+                } else if (type === 'win') {
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, i) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.value = freq;
+                        gain.gain.setValueAtTime(0.12, now + i * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.3);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + i * 0.08);
+                        osc.stop(now + i * 0.08 + 0.3);
+                    });
+                } else if (type === 'click') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                }
+            } catch (e) {}
+        }
+
+        function updateStatsUI() {
+            statSavedDays.innerText = savedDays;
+            localStorage.setItem('u_savedDays_v4', savedDays);
+        }
+
+        // Realistic 3D Flip Physics (ALWAYS LANDS ON FRONT: "NO IR A LA UNIVERSIDAD")
+        function perform3DFlip() {
+            if (isFlipping) return;
+            isFlipping = true;
+
+            flipBtn.disabled = true;
+            flipBtn.classList.add('opacity-60', 'cursor-not-allowed');
+            flipBtnText.innerText = "Lanzando y calculando trayectoria...";
+
+            resultCard.classList.add('hidden', 'opacity-0', 'scale-90');
+
+            // Force total rotation to end at exact 360-degree multiples (FRONT FACE: CARA = NO IR A LA UNIVERSIDAD)
+            const fullSpins = 8; // 8 full 360 degree rotations
+            let targetAddDegrees = fullSpins * 360;
+
+            // Align landing rotation perfectly to 0deg (360deg multiple)
+            const remainder = currentYRotation % 360;
+            if (remainder !== 0) {
+                targetAddDegrees += (360 - remainder);
+            }
+
+            const startRotation = currentYRotation;
+            const endRotation = currentYRotation + targetAddDegrees;
+            currentYRotation = endRotation;
+
+            const duration = 2500; // ms
+            const startTime = performance.now();
+
+            let soundInterval = setInterval(() => playSound('spin'), 90);
+
+            function animateFrame(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Easing Cubic Out for smooth deceleration at the end
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                const currentDeg = startRotation + (endRotation - startRotation) * easeOut;
+
+                // Parabolic Jump Curve for height
+                const jumpProgress = Math.sin(progress * Math.PI);
+                const translateY = -jumpProgress * 170; 
+                const scale = 1 + jumpProgress * 0.3;
+                const shadowScale = 1 - jumpProgress * 0.6;
+                const shadowOpacity = 0.6 - jumpProgress * 0.5;
+
+                // Flight wobble effect on X axis
+                const wobbleX = Math.sin(progress * Math.PI * 5) * 10 * (1 - progress);
+
+                coinWrapper.style.transform = `translateY(${translateY}px) scale(${scale}) rotateX(${wobbleX}deg) rotateY(${currentDeg}deg)`;
+                coinShadow.style.transform = `scale(${shadowScale})`;
+                coinShadow.style.opacity = shadowOpacity;
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateFrame);
+                } else {
+                    clearInterval(soundInterval);
+                    playSound('bounce');
+
+                    // Perfect final positioning on CARA (NO IR A LA UNIVERSIDAD)
+                    coinWrapper.style.transform = `translateY(0px) scale(1) rotateX(0deg) rotateY(${endRotation}deg)`;
+                    coinShadow.style.transform = `scale(1)`;
+                    coinShadow.style.opacity = '0.6';
+
+                    setTimeout(() => {
+                        isFlipping = false;
+                        flipBtn.disabled = false;
+                        flipBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+                        flipBtnText.innerText = "¡LANZAR LA MONEDA!";
+
+                        savedDays++;
+                        updateStatsUI();
+                        playSound('win');
+                        triggerConfetti();
+
+                        displayResultCard();
+                    }, 150);
+                }
+            }
+
+            requestAnimationFrame(animateFrame);
+        }
+
+        function displayResultCard() {
+            resultCard.classList.remove('hidden');
+            setTimeout(() => {
+                resultCard.classList.remove('opacity-0', 'scale-90');
+                resultCard.classList.add('opacity-100', 'scale-100');
+            }, 30);
+
+            resultTitle.innerText = "NO IR A LA UNIVERSIDAD";
+            resultText.innerText = victoryPhrases[Math.floor(Math.random() * victoryPhrases.length)];
+        }
+
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 120,
+                    spread: 80,
+                    origin: { y: 0.65 },
+                    colors: ['#fbbf24', '#f59e0b', '#f97316', '#6366f1', '#10b981']
+                });
+            }
+        }
+
+        function shareResultWhatsApp() {
+            playSound('click');
+            const excuseText = excuseDisplay.innerText.includes("Genera una excusa") ? "" : `\n\n*Excusa oficial:* "${excuseDisplay.innerText}"`;
+            const message = encodeURIComponent(
+                `🪙 *VEREDICTO OFICIAL DE LA MONEDA* 🪙\n\nResultado del lanzamiento imparcial:\n👉 *NO IR A LA UNIVERSIDAD*\n\nLa moneda ha hablado legítimamente: hoy NO se va a la universidad.${excuseText}\n\n_Clases salvadas por la ciencia: ${savedDays}_ 😎`
+            );
+            window.open(`https://api.whatsapp.com/send?text=${message}`, '_blank');
+        }
+
+        function generateExcuse() {
+            playSound('click');
+            const randomExcuse = excuses[Math.floor(Math.random() * excuses.length)];
+            excuseDisplay.innerText = randomExcuse;
+            excuseDisplay.classList.add('text-amber-300');
+        }
+
+        function copyExcuse() {
+            const text = excuseDisplay.innerText;
+            if (text.includes("Genera una excusa")) return;
+
+            const dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+
+            playSound('click');
+            showToast("¡Excusa copiada al portapapeles! 📋");
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2400);
+        }
+
+        // Event Listeners
+        flipBtn.addEventListener('click', perform3DFlip);
+        coinWrapper.addEventListener('click', perform3DFlip);
+        generateExcuseBtn.addEventListener('click', generateExcuse);
+        copyExcuseBtn.addEventListener('click', copyExcuse);
+        shareBtn.addEventListener('click', shareResultWhatsApp);
+
+        window.onload = function() {
+            updateStatsUI();
+        };
+    </script>
+</body>
+</html>
